@@ -1,0 +1,17 @@
+{
+  "name": "frameforge-k8s-media-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run -ws build",
+    "dev:api": "npm run --workspace @frameforge/api start:dev",
+    "dev:worker": "npm run --workspace @frameforge/worker dev"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "FrameForge",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/frameforge-k8s-media-pipeline",
+  "remoteUser": "node",
+  "runArgs": [
+    "--init"
+  ],
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [3000, 5432, 5672, 15672, 9000, 9001],
+  "postCreateCommand": "npm install && npm run build",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig",
+        "usernamehw.errorlens",
+        "redhat.vscode-yaml",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-ossdata.vscode-pgsql",
+        "GitHub.vscode-github-actions",
+        "rangav.vscode-thunder-client"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "files.eol": "\n"
+      }
+    }
+  }
+}

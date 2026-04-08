@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig",
+    "usernamehw.errorlens",
+    "redhat.vscode-yaml",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "ms-ossdata.vscode-pgsql",
+    "GitHub.vscode-github-actions",
+    "rangav.vscode-thunder-client"
+  ]
+}
