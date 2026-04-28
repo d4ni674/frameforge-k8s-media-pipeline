@@ -81,8 +81,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
+      - name: Install libvips for Sharp
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libvips42 && sudo rm -rf /var/lib/apt/lists/*
       - run: npm ci
-      - run: npm run -ws build
+      - run: npm run --workspace @frameforge/shared build
+      - run: npm run --workspace @frameforge/api build
+      - run: npm run --workspace @frameforge/worker build
       - run: docker compose up -d
       - run: cp .env.example .env
       - run: |
