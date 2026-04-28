@@ -135,8 +135,10 @@ npm run --workspace @frameforge/shared test
 Requires infrastructure running (`docker compose up -d`).
 
 ```bash
-# Build all workspaces first
-npm run -ws build
+# Build all workspaces first (shared must build before api/worker)
+npm run --workspace @frameforge/shared build
+npm run --workspace @frameforge/api build
+npm run --workspace @frameforge/worker build
 
 # Start API and Worker in separate terminals, then:
 cd e2e && npm install && npm test
@@ -252,7 +254,7 @@ kubectl scale deployment frameforge-api --replicas=2 -n frameforge
 ## Security
 
 - `.env` is gitignored; application secrets are injected via environment variables and Kubernetes Secrets at runtime.
-- K8s manifests and Helm values contain **placeholder credentials** (`<CHANGE_ME>`) for local development only — rotate before production use.
+- K8s manifests include default local-dev credentials; Helm values require explicit `--set` overrides (enforced by `required`). Rotate all credentials before production.
 - Docker images run as non-root user (`frameforge`).
 - Kubernetes manifests include `runAsNonRoot`, `allowPrivilegeEscalation: false`, and `capabilities: drop: [ALL]`.
 - NetworkPolicies restrict pod-to-pod traffic.
