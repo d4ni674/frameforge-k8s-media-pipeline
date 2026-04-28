@@ -13,5 +13,11 @@
     "sourceMap": true,
     "outDir": "dist",
     "rootDir": "src"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS",
+      "moduleResolution": "Node"
+    }
   }
 }

@@ -2,10 +2,30 @@
   "name": "@frameforge/shared",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:cov": "jest --config jest.config.js --coverage"
   },
   "devDependencies": {
-    "typescript": "^5.8.2"
+    "@eslint/js": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^10.2.1",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.59.0"
+  },
+  "dependencies": {
+    "typeorm": "^0.3.28",
+    "uuid": "^13.0.0"
   }
 }

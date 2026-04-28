@@ -2,19 +2,40 @@
   "name": "@frameforge/worker",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:cov": "jest --config jest.config.js --coverage"
   },
   "dependencies": {
-    "amqplib": "^0.10.5",
-    "pino": "^9.6.0"
+    "@frameforge/shared": "^0.1.0",
+    "amqplib": "^0.10.7",
+    "minio": "^8.0.7",
+    "pg": "^8.20.0",
+    "pino": "^9.6.0",
+    "prom-client": "^15.1.3",
+    "reflect-metadata": "^0.2.2",
+    "sharp": "^0.34.5",
+    "typeorm": "^0.3.28",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/amqplib": "^0.10.7",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
+    "eslint": "^10.2.1",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
     "tsx": "^4.20.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.59.0"
   }
 }

@@ -1,8 +1,16 @@
 node_modules/
 dist/
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.example
 *.log
 contexts/
 .DS_Store
 coverage/
+.nyc_output/
+.eslintcache
+*.swp
+*.iml
+.idea/
+

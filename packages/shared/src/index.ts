@@ -1,9 +1,15 @@
-export type JobStatus = "queued" | "processing" | "done" | "failed";
+export { Job, PROCESSING_VERSION } from "./entities/job.entity";
+export type {
+  JobStatus,
+  MediaType,
+  ProcessingProfile,
+} from "./entities/job.entity";
 
-export interface JobMessage {
-  jobId: string;
-  mediaType: "image" | "video";
-  profile: string;
-  sourceObjectKey: string;
-  createdAt: string;
-}
+export {
+  JobMessage,
+  MEDIA_QUEUE,
+  MEDIA_RETRY_QUEUE,
+  MEDIA_DLQ,
+  MAX_ATTEMPTS,
+  RETRY_DELAY_MS,
+} from "./types/job-message";

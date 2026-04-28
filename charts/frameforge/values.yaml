@@ -1,0 +1,75 @@
+replicaCount:
+  api: 1
+  worker: 1
+
+image:
+  api:
+    repository: frameforge-api
+    pullPolicy: IfNotPresent
+    tag: "0.1.0"
+  worker:
+    repository: frameforge-worker
+    pullPolicy: IfNotPresent
+    tag: "0.1.0"
+
+env:
+  pgHost: postgres.frameforge.svc.cluster.local
+  pgPort: "5432"
+  pgUser: frameforge
+  pgDatabase: frameforge
+  minioEndpoint: minio.frameforge.svc.cluster.local
+  minioPort: "9000"
+  minioBucket: frameforge
+  minioUseSsl: "false"
+  rabbitmqHost: rabbitmq.frameforge.svc.cluster.local
+  rabbitmqPort: "5672"
+  rabbitmqUser: frameforge
+
+resources:
+  api:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  worker:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: "1"
+      memory: 512Mi
+
+service:
+  api:
+    type: NodePort
+    port: 30000
+    targetPort: 3000
+    nodePort: 30000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+
+keda:
+  enabled: false
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 0
+  maxReplicaCount: 10
+  queueLength: 20
+
+monitoring:
+  enabled: true
+
+# SECURITY WARNING: Override these with --set or a separate values-secret.yaml
+# before deploying to production. Never commit real credentials.
+secrets:
+  pgPassword: ""
+  minioAccessKey: ""
+  minioSecretKey: ""
+  rabbitmqPassword: ""

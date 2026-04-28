@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "frameforge.fullname" . }}-config
+  labels:
+    {{- include "frameforge.labels" . | nindent 4 }}
+data:
+  PG_HOST: {{ .Values.env.pgHost | quote }}
+  PG_PORT: {{ .Values.env.pgPort | quote }}
+  PG_USER: {{ .Values.env.pgUser | quote }}
+  PG_DATABASE: {{ .Values.env.pgDatabase | quote }}
+  MINIO_ENDPOINT: {{ .Values.env.minioEndpoint | quote }}
+  MINIO_PORT: {{ .Values.env.minioPort | quote }}
+  MINIO_BUCKET: {{ .Values.env.minioBucket | quote }}
+  MINIO_USE_SSL: {{ .Values.env.minioUseSsl | quote }}
+  RABBITMQ_HOST: {{ .Values.env.rabbitmqHost | quote }}
+  RABBITMQ_PORT: {{ .Values.env.rabbitmqPort | quote }}
+  RABBITMQ_USER: {{ .Values.env.rabbitmqUser | quote }}

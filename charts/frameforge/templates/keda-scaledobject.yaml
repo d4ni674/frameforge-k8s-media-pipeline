@@ -1,0 +1,35 @@
+{{- if .Values.keda.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "frameforge.fullname" . }}-worker-scaler
+  labels:
+    {{- include "frameforge.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  scaleTargetRef:
+    name: {{ include "frameforge.fullname" . }}-worker
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  triggers:
+    - type: rabbitmq
+      metadata:
+        queueName: media.jobs
+        queueLength: "{{ .Values.keda.queueLength }}"
+      authenticationRef:
+        name: {{ include "frameforge.fullname" . }}-keda-trigger-auth
+---
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: {{ include "frameforge.fullname" . }}-keda-trigger-auth
+  labels:
+    {{- include "frameforge.labels" . | nindent 4 }}
+spec:
+  secretTargetRef:
+    - parameter: host
+      name: {{ include "frameforge.fullname" . }}-secrets
+      key: RABBITMQ_URL
+{{- end }}

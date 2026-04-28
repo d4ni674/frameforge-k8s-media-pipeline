@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        workspace:
+          - "@frameforge/shared"
+          - "@frameforge/api"
+          - "@frameforge/worker"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run --workspace @frameforge/shared build
+      - run: npm run --workspace ${{ matrix.workspace }} test -- --coverage --coverageReporters=text-summary
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, test]
+    strategy:
+      matrix:
+        workspace:
+          - "@frameforge/shared"
+          - "@frameforge/api"
+          - "@frameforge/worker"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run --workspace @frameforge/shared build
+        if: matrix.workspace != '@frameforge/shared'
+      - run: npm run --workspace ${{ matrix.workspace }} build
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run -ws build
+      - run: docker compose up -d
+      - run: cp .env.example .env
+      - run: |
+          env $(cat .env | xargs) npm run --workspace @frameforge/api start &
+          sleep 5
+          env $(cat .env | xargs) METRICS_PORT=9091 npm run --workspace @frameforge/worker start &
+          sleep 5
+      - run: cd e2e && npm ci && npm test
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: [build, security-audit]
+    strategy:
+      matrix:
+        service: [api, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -f apps/${{ matrix.service }}/Dockerfile -t frameforge-${{ matrix.service }}:ci .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: frameforge-${{ matrix.service }}:ci
+          format: sarif
+          output: trivy-results-${{ matrix.service }}.sarif
+        continue-on-error: true
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results-${{ matrix.service }}.sarif
+        continue-on-error: true

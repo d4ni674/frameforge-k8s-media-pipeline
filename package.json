@@ -11,6 +11,12 @@
   ],
   "scripts": {
     "build": "npm run -ws build",
+    "test": "npm run -ws test",
+    "test:e2e": "cd e2e && npm test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "dev:api": "npm run --workspace @frameforge/api start:dev",
     "dev:worker": "npm run --workspace @frameforge/worker dev"
   }
