@@ -35,7 +35,12 @@ describe("JobsController", () => {
       } as Express.Multer.File;
 
       const body = { mediaType: "image" as const, processingProfile: "thumbnail" as const };
-      const expected = { id: "uuid", status: "queued", mediaType: "image", processingProfile: "thumbnail" };
+      const expected = {
+        id: "uuid",
+        status: "queued",
+        mediaType: "image",
+        processingProfile: "thumbnail",
+      };
 
       mockService.create.mockResolvedValue(expected);
 
@@ -45,17 +50,33 @@ describe("JobsController", () => {
     });
 
     it("should throw BadRequestException when file is missing", async () => {
-      await expect(controller.createJob(undefined, { mediaType: "image", processingProfile: "thumbnail" })).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.createJob(undefined, { mediaType: "image", processingProfile: "thumbnail" }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it("should throw BadRequestException for unsupported mime type", async () => {
-      const file = { buffer: Buffer.from("test"), mimetype: "application/pdf", originalname: "test.pdf", size: 100 } as Express.Multer.File;
-      await expect(controller.createJob(file, { mediaType: "image", processingProfile: "thumbnail" })).rejects.toThrow(BadRequestException);
+      const file = {
+        buffer: Buffer.from("test"),
+        mimetype: "application/pdf",
+        originalname: "test.pdf",
+        size: 100,
+      } as Express.Multer.File;
+      await expect(
+        controller.createJob(file, { mediaType: "image", processingProfile: "thumbnail" }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it("should throw BadRequestException for non-image media type", async () => {
-      const file = { buffer: Buffer.from("test"), mimetype: "image/png", originalname: "test.png", size: 100 } as Express.Multer.File;
-      await expect(controller.createJob(file, { mediaType: "video", processingProfile: "thumbnail" })).rejects.toThrow(BadRequestException);
+      const file = {
+        buffer: Buffer.from("test"),
+        mimetype: "image/png",
+        originalname: "test.png",
+        size: 100,
+      } as Express.Multer.File;
+      await expect(
+        controller.createJob(file, { mediaType: "video", processingProfile: "thumbnail" }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

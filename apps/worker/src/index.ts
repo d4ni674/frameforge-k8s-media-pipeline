@@ -1,10 +1,6 @@
 import pino from "pino";
 
-import {
-  MEDIA_QUEUE,
-  MAX_ATTEMPTS,
-  type JobMessage,
-} from "@frameforge/shared";
+import { MEDIA_QUEUE, MAX_ATTEMPTS, type JobMessage } from "@frameforge/shared";
 
 import { createDataSource, JobRepository } from "./db";
 import { MqConsumer } from "./mq";
@@ -66,108 +62,112 @@ async function main(): Promise<void> {
 
   await consumer.consume(
     async (message: JobMessage): Promise<boolean> => {
-    if (shuttingDown) {
-      return false; // nack without requeue so another worker can pick it up
-    }
-
-    const processJob = async (): Promise<boolean> => {
-      const { jobId, mediaType, processingProfile } = message;
-      const log = logger.child({ jobId, mediaType, processingProfile });
-
-      log.info("Processing job started");
-      jobsStartedCounter.inc({ media_type: mediaType, profile: processingProfile });
-
-      const startTime = Date.now();
-
-      const job = await jobRepo.findById(jobId);
-      if (!job) {
-        log.error("Job not found in database");
-        return true;
+      if (shuttingDown) {
+        return false; // nack without requeue so another worker can pick it up
       }
 
-      if (job.status === "done") {
-        log.info("Job already completed, skipping (idempotency)");
-        return true;
-      }
+      const processJob = async (): Promise<boolean> => {
+        const { jobId, mediaType, processingProfile } = message;
+        const log = logger.child({ jobId, mediaType, processingProfile });
 
-      if (job.status === "failed" && job.attemptCount >= MAX_ATTEMPTS) {
-        log.warn({ attemptCount: job.attemptCount }, "Job already failed after max attempts, sending to DLQ");
-        await consumer.sendToDlq(message);
-        return true;
-      }
+        log.info("Processing job started");
+        jobsStartedCounter.inc({ media_type: mediaType, profile: processingProfile });
 
-      await jobRepo.updateStatus(jobId, "processing", {
-        startedAt: new Date(),
-      });
+        const startTime = Date.now();
 
-      try {
-        const result = await processor.process(job);
-
-        await jobRepo.updateStatus(jobId, "done", {
-          outputManifest: result.outputManifest,
-          finishedAt: new Date(),
-        });
-
-        const durationMs = Date.now() - startTime;
-        processingDurationHistogram.observe({ profile: processingProfile }, durationMs / 1000);
-        jobsCompletedCounter.inc({ media_type: mediaType, profile: processingProfile });
-
-        log.info({ durationMs }, "Job completed successfully");
-        return true;
-      } catch (rawError) {
-        const classified = classifyError(rawError);
-        const attemptCount = job.attemptCount + 1;
-        const isNonRetryable = classified instanceof NonRetryableError;
-        const maxAttemptsReached = attemptCount >= MAX_ATTEMPTS;
-
-        if (isNonRetryable || maxAttemptsReached) {
-          await jobRepo.updateStatus(jobId, "failed", {
-            attemptCount,
-            lastError: classified.message,
-            finishedAt: new Date(),
-          });
-
-          jobsFailedCounter.inc({ media_type: mediaType, reason: isNonRetryable ? "non_retryable" : "max_attempts" });
-
-          if (maxAttemptsReached) {
-            log.error(
-              { error: classified.message, attemptCount },
-              "Job failed after max attempts, sending to DLQ",
-            );
-            await consumer.sendToDlq(message);
-          } else {
-            log.error(
-              { error: classified.message },
-              "Job failed permanently (non-retryable)",
-            );
-          }
-
+        const job = await jobRepo.findById(jobId);
+        if (!job) {
+          log.error("Job not found in database");
           return true;
         }
 
-        await jobRepo.updateStatus(jobId, "queued", {
-          attemptCount,
-          lastError: classified.message,
-          startedAt: null,
+        if (job.status === "done") {
+          log.info("Job already completed, skipping (idempotency)");
+          return true;
+        }
+
+        if (job.status === "failed" && job.attemptCount >= MAX_ATTEMPTS) {
+          log.warn(
+            { attemptCount: job.attemptCount },
+            "Job already failed after max attempts, sending to DLQ",
+          );
+          await consumer.sendToDlq(message);
+          return true;
+        }
+
+        await jobRepo.updateStatus(jobId, "processing", {
+          startedAt: new Date(),
         });
 
-        log.warn(
-          { error: classified.message, attemptCount, maxAttempts: MAX_ATTEMPTS },
-          "Job failed, will retry via dead-letter",
-        );
+        try {
+          const result = await processor.process(job);
 
-        return false;
-      }
-    };
+          await jobRepo.updateStatus(jobId, "done", {
+            outputManifest: result.outputManifest,
+            finishedAt: new Date(),
+          });
 
-    const jobPromise = processJob();
-    inFlightPromise = jobPromise.finally(() => {
-      inFlightPromise = null;
-    });
+          const durationMs = Date.now() - startTime;
+          processingDurationHistogram.observe({ profile: processingProfile }, durationMs / 1000);
+          jobsCompletedCounter.inc({ media_type: mediaType, profile: processingProfile });
 
-    return jobPromise;
-  },
-  (error) => logger.error({ error }, "Message processing error"));
+          log.info({ durationMs }, "Job completed successfully");
+          return true;
+        } catch (rawError) {
+          const classified = classifyError(rawError);
+          const attemptCount = job.attemptCount + 1;
+          const isNonRetryable = classified instanceof NonRetryableError;
+          const maxAttemptsReached = attemptCount >= MAX_ATTEMPTS;
+
+          if (isNonRetryable || maxAttemptsReached) {
+            await jobRepo.updateStatus(jobId, "failed", {
+              attemptCount,
+              lastError: classified.message,
+              finishedAt: new Date(),
+            });
+
+            jobsFailedCounter.inc({
+              media_type: mediaType,
+              reason: isNonRetryable ? "non_retryable" : "max_attempts",
+            });
+
+            if (maxAttemptsReached) {
+              log.error(
+                { error: classified.message, attemptCount },
+                "Job failed after max attempts, sending to DLQ",
+              );
+              await consumer.sendToDlq(message);
+            } else {
+              log.error({ error: classified.message }, "Job failed permanently (non-retryable)");
+            }
+
+            return true;
+          }
+
+          await jobRepo.updateStatus(jobId, "queued", {
+            attemptCount,
+            lastError: classified.message,
+            startedAt: null,
+          });
+
+          log.warn(
+            { error: classified.message, attemptCount, maxAttempts: MAX_ATTEMPTS },
+            "Job failed, will retry via dead-letter",
+          );
+
+          return false;
+        }
+      };
+
+      const jobPromise = processJob();
+      inFlightPromise = jobPromise.finally(() => {
+        inFlightPromise = null;
+      });
+
+      return jobPromise;
+    },
+    (error) => logger.error({ error }, "Message processing error"),
+  );
 
   logger.info("Worker is ready and waiting for jobs");
 
@@ -209,6 +209,9 @@ async function main(): Promise<void> {
 
 main().catch((err) => {
   console.error("Worker failed to start:", err);
-  logger.fatal({ error: err instanceof Error ? err.message : String(err) }, "Worker failed to start");
+  logger.fatal(
+    { error: err instanceof Error ? err.message : String(err) },
+    "Worker failed to start",
+  );
   process.exit(1);
 });

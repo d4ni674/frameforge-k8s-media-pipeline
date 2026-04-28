@@ -16,12 +16,7 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiQuery } from "@nestjs/swagger";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { JobsService } from "./jobs.service";
 
-const ALLOWED_MIME_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-]);
+const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
@@ -47,9 +42,7 @@ export class JobsController {
     }
 
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
-      throw new BadRequestException(
-        `Unsupported file type: ${file.mimetype}`,
-      );
+      throw new BadRequestException(`Unsupported file type: ${file.mimetype}`);
     }
 
     if (body.mediaType !== "image") {

@@ -8,7 +8,10 @@ export class CreateJobDto {
   @IsEnum(["image", "video"])
   mediaType!: MediaType;
 
-  @ApiProperty({ enum: ["thumbnail", "resized-800", "webp"], description: "Processing profile to apply" })
+  @ApiProperty({
+    enum: ["thumbnail", "resized-800", "webp"],
+    description: "Processing profile to apply",
+  })
   @IsIn(["thumbnail", "resized-800", "webp"])
   processingProfile!: ProcessingProfile;
 }

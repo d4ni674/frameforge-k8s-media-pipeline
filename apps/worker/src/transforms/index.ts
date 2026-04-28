@@ -1,6 +1,1 @@
-export {
-  generateThumbnail,
-  generateResized,
-  generateWebp,
-  type TransformResult,
-} from "./image";
+export { generateThumbnail, generateResized, generateWebp, type TransformResult } from "./image";

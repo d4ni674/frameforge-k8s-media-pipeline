@@ -1,9 +1,5 @@
 export { Job, PROCESSING_VERSION } from "./entities/job.entity";
-export type {
-  JobStatus,
-  MediaType,
-  ProcessingProfile,
-} from "./entities/job.entity";
+export type { JobStatus, MediaType, ProcessingProfile } from "./entities/job.entity";
 
 export {
   JobMessage,

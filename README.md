@@ -53,14 +53,14 @@ The API will be available at `http://localhost:3000`.
 
 ### Service URLs (Local)
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| API | http://localhost:3000 | — |
-| API Metrics | http://localhost:3000/metrics | — |
-| Worker Metrics | http://localhost:9090/metrics | — |
-| PostgreSQL | localhost:5432 | `frameforge` / `frameforge` |
-| MinIO Console | http://localhost:9001 | `minioadmin` / `minioadmin` |
-| RabbitMQ Mgmt | http://localhost:15672 | `frameforge` / `frameforge` |
+| Service        | URL                           | Credentials                 |
+| -------------- | ----------------------------- | --------------------------- |
+| API            | http://localhost:3000         | —                           |
+| API Metrics    | http://localhost:3000/metrics | —                           |
+| Worker Metrics | http://localhost:9090/metrics | —                           |
+| PostgreSQL     | localhost:5432                | `frameforge` / `frameforge` |
+| MinIO Console  | http://localhost:9001         | `minioadmin` / `minioadmin` |
+| RabbitMQ Mgmt  | http://localhost:15672        | `frameforge` / `frameforge` |
 
 ## API Endpoints
 
@@ -76,6 +76,7 @@ curl -X POST http://localhost:3000/jobs \
 **Profiles**: `thumbnail` (200×200), `resized-800` (800×800), `webp` (full-size WebP)
 
 **Response**:
+
 ```json
 {
   "id": "uuid",

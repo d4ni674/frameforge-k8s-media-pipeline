@@ -13,11 +13,7 @@ export class JobRepository {
     return this.repo.findOne({ where: { id } });
   }
 
-  async updateStatus(
-    id: string,
-    status: JobStatus,
-    updates?: Partial<Job>,
-  ): Promise<void> {
+  async updateStatus(id: string, status: JobStatus, updates?: Partial<Job>): Promise<void> {
     await this.repo.update(id, {
       status,
       updatedAt: new Date(),

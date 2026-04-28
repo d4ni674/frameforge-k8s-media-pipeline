@@ -73,27 +73,27 @@ kubectl apply -f infra/k8s/monitoring/
 
 ### Local Development
 
-| Service | URL | Username | Password |
-|---------|-----|----------|----------|
-| **API** | http://localhost:3000 | — | — |
-| **API Metrics** | http://localhost:3000/metrics | — | — |
-| **Worker Metrics** | http://localhost:9090/metrics | — | — |
-| **PostgreSQL** | localhost:5432 | `frameforge` | `frameforge` |
-| **MinIO Console** | http://localhost:9001 | `minioadmin` | `minioadmin` |
-| **MinIO API** | localhost:9000 | `minioadmin` | `minioadmin` |
-| **RabbitMQ Management** | http://localhost:15672 | `frameforge` | `frameforge` |
-| **RabbitMQ AMQP** | localhost:5672 | `frameforge` | `frameforge` |
+| Service                 | URL                           | Username     | Password     |
+| ----------------------- | ----------------------------- | ------------ | ------------ |
+| **API**                 | http://localhost:3000         | —            | —            |
+| **API Metrics**         | http://localhost:3000/metrics | —            | —            |
+| **Worker Metrics**      | http://localhost:9090/metrics | —            | —            |
+| **PostgreSQL**          | localhost:5432                | `frameforge` | `frameforge` |
+| **MinIO Console**       | http://localhost:9001         | `minioadmin` | `minioadmin` |
+| **MinIO API**           | localhost:9000                | `minioadmin` | `minioadmin` |
+| **RabbitMQ Management** | http://localhost:15672        | `frameforge` | `frameforge` |
+| **RabbitMQ AMQP**       | localhost:5672                | `frameforge` | `frameforge` |
 
 ### Kubernetes
 
-| Service | Access Method | Credentials |
-|---------|--------------|-------------|
-| **API** | `kubectl port-forward svc/frameforge-api 30001:30000 -n frameforge` → http://localhost:30001 | — |
-| **PostgreSQL** | Inside cluster at `postgres.frameforge.svc.cluster.local:5432` | `frameforge` / `frameforge` |
-| **MinIO Console** | `kubectl port-forward svc/minio 9001:9001 -n frameforge` → http://localhost:9001 | `minioadmin` / `minioadmin123` |
-| **MinIO API** | Inside cluster at `minio.frameforge.svc.cluster.local:9000` | `minioadmin` / `minioadmin123` |
-| **RabbitMQ Management** | `kubectl port-forward svc/rabbitmq 15672:15672 -n frameforge` → http://localhost:15672 | `frameforge` / `frameforge` |
-| **Grafana** | `kubectl port-forward svc/prometheus-grafana 30002:80 -n monitoring` → http://localhost:30002 | `admin` / *(see below)* |
+| Service                 | Access Method                                                                                 | Credentials                    |
+| ----------------------- | --------------------------------------------------------------------------------------------- | ------------------------------ |
+| **API**                 | `kubectl port-forward svc/frameforge-api 30001:30000 -n frameforge` → http://localhost:30001  | —                              |
+| **PostgreSQL**          | Inside cluster at `postgres.frameforge.svc.cluster.local:5432`                                | `frameforge` / `frameforge`    |
+| **MinIO Console**       | `kubectl port-forward svc/minio 9001:9001 -n frameforge` → http://localhost:9001              | `minioadmin` / `minioadmin123` |
+| **MinIO API**           | Inside cluster at `minio.frameforge.svc.cluster.local:9000`                                   | `minioadmin` / `minioadmin123` |
+| **RabbitMQ Management** | `kubectl port-forward svc/rabbitmq 15672:15672 -n frameforge` → http://localhost:15672        | `frameforge` / `frameforge`    |
+| **Grafana**             | `kubectl port-forward svc/prometheus-grafana 30002:80 -n monitoring` → http://localhost:30002 | `admin` / _(see below)_        |
 
 #### Grafana Password
 
@@ -107,6 +107,7 @@ kubectl -n monitoring get secrets prometheus-grafana \
 ## API Endpoints
 
 ### POST /jobs
+
 Upload a media file and create a processing job.
 
 ```bash
@@ -119,6 +120,7 @@ curl -X POST http://localhost:30001/jobs \
 **Profiles**: `thumbnail` (200×200), `resized-800` (800×800), `webp` (full-size WebP)
 
 **Response**:
+
 ```json
 {
   "id": "uuid",
@@ -129,18 +131,23 @@ curl -X POST http://localhost:30001/jobs \
 ```
 
 ### GET /jobs/:id
+
 Full job details including output manifest.
 
 ### GET /jobs/:id/status
+
 Lightweight job status only.
 
 ### GET /jobs?page=1&limit=20&status=done
+
 Paginated job list with optional status filter.
 
 ### GET /health
+
 Health check endpoint.
 
 ### GET /metrics
+
 Prometheus metrics endpoint.
 
 ---
@@ -148,9 +155,11 @@ Prometheus metrics endpoint.
 ## Worker Metrics (port 9090)
 
 ### GET /metrics
+
 Prometheus metrics — worker-side processing metrics.
 
 Key metrics:
+
 - `frameforge_worker_jobs_started_total`
 - `frameforge_worker_jobs_completed_total`
 - `frameforge_worker_jobs_failed_total`
@@ -191,6 +200,7 @@ helm upgrade frameforge ./charts/frameforge -n frameforge \
 This creates a `ScaledObject` that monitors `media.jobs` queue depth and scales workers between `0` and `10` replicas (default settings in `values.yaml`).
 
 **KEDA values** (from `values.yaml`):
+
 - `pollingInterval: 15` — how often KEDA checks the queue
 - `cooldownPeriod: 300` — how long to wait before scaling down
 - `minReplicaCount: 0` — scale to zero when idle
@@ -281,7 +291,9 @@ kubectl port-forward svc/prometheus-grafana 30002:80 -n monitoring
 ## Monitoring
 
 ### Grafana Dashboard
+
 The FrameForge dashboard is auto-provisioned in Grafana. It shows:
+
 - Queue depth (main, retry, DLQ)
 - Jobs created / completed / failed per profile
 - Processing duration (p50, p95, p99)
@@ -289,28 +301,29 @@ The FrameForge dashboard is auto-provisioned in Grafana. It shows:
 - Upload failure rate
 
 ### Prometheus Targets
+
 Both API (`/metrics`) and Worker (`:9090/metrics`) are scraped via ServiceMonitors.
 
 ---
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PG_HOST` | PostgreSQL host | localhost |
-| `PG_PORT` | PostgreSQL port | 5432 |
-| `PG_USER` | PostgreSQL user | frameforge |
-| `PG_PASSWORD` | PostgreSQL password | frameforge |
-| `PG_DATABASE` | PostgreSQL database | frameforge |
-| `MINIO_ENDPOINT` | MinIO endpoint | localhost |
-| `MINIO_PORT` | MinIO port | 9000 |
-| `MINIO_ACCESS_KEY` | MinIO access key | minioadmin |
-| `MINIO_SECRET_KEY` | MinIO secret key | minioadmin |
-| `MINIO_BUCKET` | MinIO bucket name | frameforge |
-| `MINIO_USE_SSL` | Use SSL for MinIO | false |
-| `RABBITMQ_URL` | RabbitMQ AMQP URL | amqp://frameforge:frameforge@localhost:5672 |
-| `PORT` | API listen port | 3000 |
-| `METRICS_PORT` | Worker metrics port | 9090 |
+| Variable           | Description         | Default                                     |
+| ------------------ | ------------------- | ------------------------------------------- |
+| `PG_HOST`          | PostgreSQL host     | localhost                                   |
+| `PG_PORT`          | PostgreSQL port     | 5432                                        |
+| `PG_USER`          | PostgreSQL user     | frameforge                                  |
+| `PG_PASSWORD`      | PostgreSQL password | frameforge                                  |
+| `PG_DATABASE`      | PostgreSQL database | frameforge                                  |
+| `MINIO_ENDPOINT`   | MinIO endpoint      | localhost                                   |
+| `MINIO_PORT`       | MinIO port          | 9000                                        |
+| `MINIO_ACCESS_KEY` | MinIO access key    | minioadmin                                  |
+| `MINIO_SECRET_KEY` | MinIO secret key    | minioadmin                                  |
+| `MINIO_BUCKET`     | MinIO bucket name   | frameforge                                  |
+| `MINIO_USE_SSL`    | Use SSL for MinIO   | false                                       |
+| `RABBITMQ_URL`     | RabbitMQ AMQP URL   | amqp://frameforge:frameforge@localhost:5672 |
+| `PORT`             | API listen port     | 3000                                        |
+| `METRICS_PORT`     | Worker metrics port | 9090                                        |
 
 ---
 

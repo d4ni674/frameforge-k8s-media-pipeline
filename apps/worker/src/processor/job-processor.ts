@@ -1,11 +1,7 @@
 import { Job, type ProcessingProfile } from "@frameforge/shared";
 
 import { StorageService } from "../storage/storage.service";
-import {
-  generateThumbnail,
-  generateResized,
-  generateWebp,
-} from "../transforms";
+import { generateThumbnail, generateResized, generateWebp } from "../transforms";
 import { NonRetryableError } from "./errors";
 
 export interface ProcessorResult {
@@ -56,9 +52,7 @@ export class JobProcessor {
         return { outputManifest: { webp: result.objectKey } };
       }
       default:
-        throw new NonRetryableError(
-          `Unsupported processing profile: ${profile}`,
-        );
+        throw new NonRetryableError(`Unsupported processing profile: ${profile}`);
     }
   }
 }

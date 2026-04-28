@@ -122,6 +122,7 @@ curl -X POST http://localhost:3000/jobs \
 **Supported profiles**: `thumbnail`, `resized-800`, `webp`
 
 **Response**:
+
 ```json
 {
   "id": "b33d73eb-8a61-4e4f-928b-b08d59a15bda",
@@ -145,6 +146,7 @@ curl http://localhost:3000/jobs/$JOB_ID | jq .
 ```
 
 Expected `done` response:
+
 ```json
 {
   "id": "...",
@@ -271,6 +273,7 @@ psql -h localhost -U frameforge -d frameforge
 ```
 
 Query jobs:
+
 ```sql
 SELECT id, status, processing_profile, attempt_count, output_manifest FROM jobs;
 ```
@@ -280,6 +283,7 @@ SELECT id, status, processing_profile, attempt_count, output_manifest FROM jobs;
 Management UI: `http://localhost:15672` (login: `frameforge` / `frameforge`)
 
 Queues to watch:
+
 - `media.jobs` — main queue
 - `media.jobs.retry` — retry queue (30s TTL)
 - `media.jobs.dlq` — dead-letter queue

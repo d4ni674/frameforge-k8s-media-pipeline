@@ -1,17 +1,8 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from "typeorm";
 
 export type JobStatus = "queued" | "processing" | "done" | "failed";
 export type MediaType = "image" | "video";
-export type ProcessingProfile =
-  | "thumbnail"
-  | "resized-800"
-  | "webp";
+export type ProcessingProfile = "thumbnail" | "resized-800" | "webp";
 
 export const PROCESSING_VERSION = 1;
 

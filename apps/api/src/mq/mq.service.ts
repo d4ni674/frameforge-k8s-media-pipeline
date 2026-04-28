@@ -1,17 +1,8 @@
-import {
-  Injectable,
-  OnModuleDestroy,
-  OnModuleInit,
-} from "@nestjs/common";
+import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import * as amqp from "amqplib";
 
 import { ConfigService } from "../config/config.service";
-import {
-  MEDIA_DLQ,
-  MEDIA_QUEUE,
-  MEDIA_RETRY_QUEUE,
-  type JobMessage,
-} from "@frameforge/shared";
+import { MEDIA_DLQ, MEDIA_QUEUE, MEDIA_RETRY_QUEUE, type JobMessage } from "@frameforge/shared";
 
 @Injectable()
 export class MqService implements OnModuleInit, OnModuleDestroy {
@@ -58,10 +49,8 @@ export class MqService implements OnModuleInit, OnModuleDestroy {
       throw new Error("RabbitMQ channel not initialized");
     }
 
-    this.channel.sendToQueue(
-      MEDIA_QUEUE,
-      Buffer.from(JSON.stringify(message)),
-      { persistent: true },
-    );
+    this.channel.sendToQueue(MEDIA_QUEUE, Buffer.from(JSON.stringify(message)), {
+      persistent: true,
+    });
   }
 }

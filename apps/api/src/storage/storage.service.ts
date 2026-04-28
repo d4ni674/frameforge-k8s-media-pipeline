@@ -32,13 +32,9 @@ export class StorageService implements OnModuleInit {
     size: number,
     contentType: string,
   ): Promise<void> {
-    await this.client.putObject(
-      this.config.minioBucket,
-      objectKey,
-      data,
-      size,
-      { "Content-Type": contentType },
-    );
+    await this.client.putObject(this.config.minioBucket, objectKey, data, size, {
+      "Content-Type": contentType,
+    });
   }
 
   async download(objectKey: string): Promise<Readable> {

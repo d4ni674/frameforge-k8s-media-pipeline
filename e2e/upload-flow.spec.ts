@@ -119,7 +119,7 @@ describe("End-to-end upload flow", () => {
   it("should reject video media type in MVP", async () => {
     const file = createTestPng();
     const form = new FormData();
-  form.append("file", new Blob([new Uint8Array(file)], { type: "image/png" }), "test.png");
+    form.append("file", new Blob([new Uint8Array(file)], { type: "image/png" }), "test.png");
     form.append("mediaType", "video");
     form.append("processingProfile", "thumbnail");
 

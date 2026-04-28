@@ -20,6 +20,7 @@ High-signal guidance for OpenCode sessions working in this repo.
    - Worker: `export $(cat .env | xargs) && npm run dev:worker`
 
 Dev servers:
+
 - API (`apps/api`): `ts-node-dev --respawn --transpile-only src/main.ts` → port 3000.
 - Worker (`apps/worker`): `tsx src/index.ts` → metrics on port 9090.
 

@@ -1,9 +1,5 @@
 import { Controller, Get } from "@nestjs/common";
-import {
-  HealthCheck,
-  HealthCheckService,
-  TypeOrmHealthIndicator,
-} from "@nestjs/terminus";
+import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from "@nestjs/terminus";
 import { RabbitMQHealthIndicator } from "./rabbitmq.health.indicator";
 
 @Controller("health")

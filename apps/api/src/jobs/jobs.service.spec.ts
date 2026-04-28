@@ -47,7 +47,12 @@ describe("JobsService", () => {
 
   describe("create", () => {
     it("should create a job, upload file, and publish message", async () => {
-      const file = { buffer: Buffer.from("test"), mimetype: "image/png", originalname: "test.png", size: 100 };
+      const file = {
+        buffer: Buffer.from("test"),
+        mimetype: "image/png",
+        originalname: "test.png",
+        size: 100,
+      };
       const savedJob = {
         id: "uuid",
         status: "queued",

@@ -1,11 +1,6 @@
 import * as amqp from "amqplib";
 
-import {
-  MEDIA_DLQ,
-  MEDIA_QUEUE,
-  MEDIA_RETRY_QUEUE,
-  type JobMessage,
-} from "@frameforge/shared";
+import { MEDIA_DLQ, MEDIA_QUEUE, MEDIA_RETRY_QUEUE, type JobMessage } from "@frameforge/shared";
 
 export class MqConsumer {
   private connection: amqp.ChannelModel | null = null;
@@ -75,11 +70,7 @@ export class MqConsumer {
       throw new Error("Channel not initialized");
     }
 
-    this.channel.sendToQueue(
-      MEDIA_DLQ,
-      Buffer.from(JSON.stringify(message)),
-      { persistent: true },
-    );
+    this.channel.sendToQueue(MEDIA_DLQ, Buffer.from(JSON.stringify(message)), { persistent: true });
   }
 
   async close(): Promise<void> {

@@ -31,12 +31,7 @@ export class StorageService {
     }
   }
 
-  async upload(
-    objectKey: string,
-    data: Buffer,
-    size: number,
-    contentType: string,
-  ): Promise<void> {
+  async upload(objectKey: string, data: Buffer, size: number, contentType: string): Promise<void> {
     await this.client.putObject(this.bucket, objectKey, data, size, {
       "Content-Type": contentType,
     });

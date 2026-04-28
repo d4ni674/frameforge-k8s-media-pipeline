@@ -38,13 +38,8 @@ export async function generateResized(
   };
 }
 
-export async function generateWebp(
-  sourceBuffer: Buffer,
-  jobId: string,
-): Promise<TransformResult> {
-  const data = await sharp(sourceBuffer)
-    .webp({ quality: 90 })
-    .toBuffer();
+export async function generateWebp(sourceBuffer: Buffer, jobId: string): Promise<TransformResult> {
+  const data = await sharp(sourceBuffer).webp({ quality: 90 }).toBuffer();
 
   return {
     objectKey: `outputs/${jobId}/optimized.webp`,
