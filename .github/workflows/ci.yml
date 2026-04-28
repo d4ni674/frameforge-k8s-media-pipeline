@@ -88,6 +88,32 @@ jobs:
       - run: npm run --workspace @frameforge/api build
       - run: npm run --workspace @frameforge/worker build
       - run: docker compose up -d
+      - name: Wait for infrastructure services
+        run: |
+          echo "Waiting for Postgres..."
+          for i in $(seq 1 30); do
+            if docker compose exec -T postgres pg_isready -U frameforge > /dev/null 2>&1; then
+              echo "Postgres is ready"
+              break
+            fi
+            sleep 2
+          done
+          echo "Waiting for RabbitMQ..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:15672 > /dev/null 2>&1; then
+              echo "RabbitMQ is ready"
+              break
+            fi
+            sleep 2
+          done
+          echo "Waiting for MinIO..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live > /dev/null 2>&1; then
+              echo "MinIO is ready"
+              break
+            fi
+            sleep 2
+          done
       - run: cp .env.example .env
       - run: |
           env $(cat .env | xargs) npm run --workspace @frameforge/api start > /tmp/api.log 2>&1 &
