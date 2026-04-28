@@ -90,8 +90,8 @@ jobs:
       - run: docker compose up -d
       - run: cp .env.example .env
       - run: |
-          env $(cat .env | xargs) npm run --workspace @frameforge/api start &
-          env $(cat .env | xargs) METRICS_PORT=9091 npm run --workspace @frameforge/worker start &
+          env $(cat .env | xargs) npm run --workspace @frameforge/api start > /tmp/api.log 2>&1 &
+          env $(cat .env | xargs) METRICS_PORT=9091 npm run --workspace @frameforge/worker start > /tmp/worker.log 2>&1 &
       - name: Wait for API to be ready
         run: |
           for i in $(seq 1 30); do
@@ -102,6 +102,10 @@ jobs:
             echo "Waiting for API... ($i/30)"
             sleep 2
           done
+          echo "=== API logs ==="
+          cat /tmp/api.log || true
+          echo "=== Worker logs ==="
+          cat /tmp/worker.log || true
           echo "API did not become ready in time"
           exit 1
       - run: cd e2e && npm ci && npm test
