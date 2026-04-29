@@ -1,0 +1,267 @@
+{
+  "info": {
+    "name": "FrameForge API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "FrameForge — Event-driven media processing platform. Upload images via REST API, queue them for processing, and retrieve results."
+  },
+  "item": [
+    {
+      "name": "Create Job",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "mediaType",
+              "value": "image",
+              "type": "text"
+            },
+            {
+              "key": "processingProfile",
+              "value": "thumbnail",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/jobs",
+          "host": ["{{base_url}}"],
+          "path": ["jobs"]
+        },
+        "description": "Upload a media file and create a processing job.\n\n**Profiles**:\n- `thumbnail` — 200×200 cover\n- `resized-800` — 800×800 fit inside\n- `webp` — full-size WebP optimization\n\n**Allowed MIME types**: `image/jpeg`, `image/png`, `image/webp`, `image/gif`\n\n**Max file size**: 50 MB\n\n**mediaType**: Currently only `image` is supported (`video` returns 400)."
+      },
+      "response": [
+        {
+          "name": "Success — Job Queued",
+          "originalRequest": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/jobs",
+              "host": ["{{base_url}}"],
+              "path": ["jobs"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "mediaType", "value": "image", "type": "text" },
+                { "key": "processingProfile", "value": "thumbnail", "type": "text" }
+              ]
+            }
+          },
+          "status": "201",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"status\": \"queued\",\n  \"mediaType\": \"image\",\n  \"processingProfile\": \"thumbnail\"\n}",
+          "_postman_previewlanguage": "json"
+        },
+        {
+          "name": "Error — Unsupported File Type",
+          "originalRequest": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/jobs", "host": ["{{base_url}}"], "path": ["jobs"] }
+          },
+          "status": "400",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Unsupported file type: text/plain\",\n  \"error\": \"Bad Request\"\n}"
+        },
+        {
+          "name": "Error — Video Not Supported",
+          "originalRequest": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/jobs", "host": ["{{base_url}}"], "path": ["jobs"] }
+          },
+          "status": "400",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Only image processing is supported in MVP\",\n  \"error\": \"Bad Request\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Job",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jobs/:id",
+          "host": ["{{base_url}}"],
+          "path": ["jobs", ":id"]
+        },
+        "description": "Get full job details including output manifest.\n\nReturns the complete job object with all fields. When the job is `done`, `outputManifest` contains the output object keys."
+      },
+      "response": [
+        {
+          "name": "Success — Completed Job",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890"]
+            }
+          },
+          "status": "200",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"status\": \"done\",\n  \"mediaType\": \"image\",\n  \"processingProfile\": \"thumbnail\",\n  \"processingVersion\": 1,\n  \"sourceObjectKey\": \"originals/a1b2c3d4-e5f6-7890-abcd-ef1234567890/source\",\n  \"sourceHash\": \"sha256hash...\",\n  \"outputManifest\": {\n    \"thumbnail\": \"outputs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/thumbnail.webp\"\n  },\n  \"attemptCount\": 0,\n  \"lastError\": null,\n  \"createdAt\": \"2026-01-15T10:30:00.000Z\",\n  \"updatedAt\": \"2026-01-15T10:30:05.000Z\",\n  \"startedAt\": \"2026-01-15T10:30:02.000Z\",\n  \"finishedAt\": \"2026-01-15T10:30:05.000Z\"\n}",
+          "_postman_previewlanguage": "json"
+        },
+        {
+          "name": "Error — Not Found",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/jobs/99999999-0000-0000-0000-000000000000",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "99999999-0000-0000-0000-000000000000"]
+            }
+          },
+          "status": "404",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"statusCode\": 404,\n  \"message\": \"Job 99999999-0000-0000-0000-000000000000 not found\",\n  \"error\": \"Not Found\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Job Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jobs/:id/status",
+          "host": ["{{base_url}}"],
+          "path": ["jobs", ":id", "status"]
+        },
+        "description": "Get lightweight job status only. Useful for polling."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/status",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "status"]
+            }
+          },
+          "status": "200",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n  \"status\": \"done\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "List Jobs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/jobs?page=1&limit=20&status=done",
+          "host": ["{{base_url}}"],
+          "path": ["jobs"],
+          "query": [
+            { "key": "page", "value": "1", "description": "Page number (default: 1)" },
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Items per page (default: 20, max: 100)"
+            },
+            {
+              "key": "status",
+              "value": "done",
+              "description": "Filter by status: queued | processing | done | failed"
+            }
+          ]
+        },
+        "description": "List jobs with pagination and optional status filter. Results are ordered by `createdAt` descending."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/jobs?page=1&limit=20&status=done",
+              "host": ["{{base_url}}"],
+              "path": ["jobs"]
+            }
+          },
+          "status": "200",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"data\": [\n    {\n      \"id\": \"a1b2c3d4-e5f6-7890-abcd-ef1234567890\",\n      \"status\": \"done\",\n      \"mediaType\": \"image\",\n      \"processingProfile\": \"thumbnail\",\n      \"processingVersion\": 1,\n      \"sourceObjectKey\": \"originals/a1b2c3d4-e5f6-7890-abcd-ef1234567890/source\",\n      \"sourceHash\": \"sha256hash...\",\n      \"outputManifest\": {\n        \"thumbnail\": \"outputs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/thumbnail.webp\"\n      },\n      \"attemptCount\": 0,\n      \"lastError\": null,\n      \"createdAt\": \"2026-01-15T10:30:00.000Z\",\n      \"updatedAt\": \"2026-01-15T10:30:05.000Z\",\n      \"startedAt\": \"2026-01-15T10:30:02.000Z\",\n      \"finishedAt\": \"2026-01-15T10:30:05.000Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20\n}",
+          "_postman_previewlanguage": "json"
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Returns the health status of the API and its dependencies (PostgreSQL, RabbitMQ)."
+      },
+      "response": [
+        {
+          "name": "All Healthy",
+          "originalRequest": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          },
+          "status": "200",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"ok\",\n  \"info\": {\n    \"database\": { \"status\": \"up\" },\n    \"rabbitmq\": { \"status\": \"up\" }\n  },\n  \"error\": {},\n  \"details\": {\n    \"database\": { \"status\": \"up\" },\n    \"rabbitmq\": { \"status\": \"up\" }\n  }\n}"
+        },
+        {
+          "name": "Degraded",
+          "originalRequest": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          },
+          "status": "503",
+          "code": 503,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"degraded\",\n  \"info\": {},\n  \"error\": {\n    \"rabbitmq\": { \"status\": \"down\" }\n  },\n  \"details\": {\n    \"database\": { \"status\": \"up\" },\n    \"rabbitmq\": { \"status\": \"down\" }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Prometheus Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/metrics",
+          "host": ["{{base_url}}"],
+          "path": ["metrics"]
+        },
+        "description": "Prometheus-format metrics for the API.\n\n**Key metrics**:\n- `frameforge_upload_requests_total`\n- `frameforge_upload_failures_total`\n- `frameforge_jobs_created_total`\n- `frameforge_jobs_completed_total`\n- `frameforge_jobs_failed_total`\n- `frameforge_job_processing_duration_seconds`"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
