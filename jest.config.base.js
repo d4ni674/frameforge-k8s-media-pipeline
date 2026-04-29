@@ -5,10 +5,11 @@ module.exports = {
   roots: ["<rootDir>/src"],
   testMatch: ["**/*.spec.ts", "**/*.test.ts"],
   transform: {
-    "^.+\\.ts$": [
+    "^.+\\.(ts|js)$": [
       "ts-jest",
       {
         tsconfig: "<rootDir>/tsconfig.json",
+        useESM: false,
       },
     ],
   },
@@ -16,4 +17,5 @@ module.exports = {
   collectCoverageFrom: ["src/**/*.ts", "!src/**/*.d.ts", "!src/**/index.ts"],
   coverageDirectory: "<rootDir>/coverage",
   clearMocks: true,
+  transformIgnorePatterns: ["node_modules/(?!(uuid)/)"],
 };
