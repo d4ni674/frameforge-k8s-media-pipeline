@@ -1,0 +1,374 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "FrameForge API",
+    "description": "Event-driven media processing platform. Upload images via REST API, queue them for processing, and retrieve results.",
+    "version": "0.1.0",
+    "contact": {
+      "name": "FrameForge"
+    },
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [{ "url": "http://localhost:3000", "description": "Local development" }],
+  "tags": [
+    { "name": "jobs", "description": "Job management" },
+    { "name": "health", "description": "Health check" },
+    { "name": "metrics", "description": "Prometheus metrics" }
+  ],
+  "paths": {
+    "/jobs": {
+      "post": {
+        "tags": ["jobs"],
+        "summary": "Upload a media file and create a processing job",
+        "operationId": "createJob",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file", "mediaType", "processingProfile"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file (JPEG, PNG, WebP, GIF). Max 50 MB."
+                  },
+                  "mediaType": {
+                    "type": "string",
+                    "enum": ["image", "video"],
+                    "description": "Type of media. Only `image` is supported in MVP."
+                  },
+                  "processingProfile": {
+                    "type": "string",
+                    "enum": ["thumbnail", "resized-800", "webp"],
+                    "description": "Processing profile:\n- `thumbnail` — 200×200 cover\n- `resized-800` — 800×800 fit inside\n- `webp` — full-size WebP optimization"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Job created and queued for processing",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/JobCreated" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request — missing file, unsupported type, or invalid media type",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BadRequest" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["jobs"],
+        "summary": "List jobs with pagination and optional status filter",
+        "operationId": "listJobs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["queued", "processing", "done", "failed"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of jobs",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/JobList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "Get full job details",
+        "operationId": "getJob",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full job object",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Job" }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFound" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/status": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "Get lightweight job status (useful for polling)",
+        "operationId": "getJobStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/JobStatus" }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/NotFound" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health check — returns status of API, database, and RabbitMQ",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "All services healthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthOk" }
+              }
+            }
+          },
+          "503": {
+            "description": "One or more services unhealthy",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HealthDegraded" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": ["metrics"],
+        "summary": "Prometheus-format metrics",
+        "operationId": "getMetrics",
+        "responses": {
+          "200": {
+            "description": "Prometheus text format metrics",
+            "content": {
+              "text/plain": {
+                "schema": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "JobCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
+          "status": { "type": "string", "enum": ["queued"], "example": "queued" },
+          "mediaType": { "type": "string", "enum": ["image", "video"], "example": "image" },
+          "processingProfile": {
+            "type": "string",
+            "enum": ["thumbnail", "resized-800", "webp"],
+            "example": "thumbnail"
+          }
+        },
+        "required": ["id", "status", "mediaType", "processingProfile"]
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["queued", "processing", "done", "failed"] },
+          "mediaType": { "type": "string", "enum": ["image", "video"] },
+          "processingProfile": { "type": "string", "enum": ["thumbnail", "resized-800", "webp"] },
+          "processingVersion": { "type": "integer", "example": 1 },
+          "sourceObjectKey": {
+            "type": "string",
+            "example": "originals/a1b2c3d4-e5f6-7890-abcd-ef1234567890/source"
+          },
+          "sourceHash": { "type": "string", "nullable": true, "example": "sha256hash..." },
+          "outputManifest": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": { "type": "string" },
+            "example": {
+              "thumbnail": "outputs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/thumbnail.webp"
+            }
+          },
+          "attemptCount": { "type": "integer", "example": 0 },
+          "lastError": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "startedAt": { "type": "string", "format": "date-time", "nullable": true },
+          "finishedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": [
+          "id",
+          "status",
+          "mediaType",
+          "processingProfile",
+          "sourceObjectKey",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "JobStatus": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["queued", "processing", "done", "failed"] }
+        },
+        "required": ["id", "status"]
+      },
+      "JobList": {
+        "type": "object",
+        "properties": {
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/Job" } },
+          "total": { "type": "integer" },
+          "page": { "type": "integer" },
+          "limit": { "type": "integer" }
+        },
+        "required": ["data", "total", "page", "limit"]
+      },
+      "BadRequest": {
+        "type": "object",
+        "properties": {
+          "statusCode": { "type": "integer", "example": 400 },
+          "message": { "type": "string" },
+          "error": { "type": "string", "example": "Bad Request" }
+        }
+      },
+      "NotFound": {
+        "type": "object",
+        "properties": {
+          "statusCode": { "type": "integer", "example": 404 },
+          "message": { "type": "string", "example": "Job not found" },
+          "error": { "type": "string", "example": "Not Found" }
+        }
+      },
+      "HealthOk": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "ok" },
+          "info": {
+            "type": "object",
+            "properties": {
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              }
+            }
+          },
+          "error": { "type": "object" },
+          "details": {
+            "type": "object",
+            "properties": {
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              }
+            }
+          }
+        }
+      },
+      "HealthDegraded": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "degraded" },
+          "info": { "type": "object" },
+          "error": {
+            "type": "object",
+            "properties": {
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "down" } }
+              }
+            }
+          },
+          "details": {
+            "type": "object",
+            "properties": {
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "down" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

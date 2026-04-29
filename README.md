@@ -116,6 +116,13 @@ curl http://localhost:3000/health
 curl http://localhost:3000/metrics
 ```
 
+## API Documentation
+
+- **Swagger UI (live)**: `http://localhost:3000/api/docs` — available when the API is running
+- **Swagger UI (static)**: [GitHub Pages](https://d4ni674.github.io/frameforge-k8s-media-pipeline/) — always up to date
+- **OpenAPI spec**: [`docs/openapi.json`](docs/openapi.json)
+- **Postman collection**: [`docs/frameforge-api.postman_collection.json`](docs/frameforge-api.postman_collection.json)
+
 ## Testing
 
 ### Unit Tests
