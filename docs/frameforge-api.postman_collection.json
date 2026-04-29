@@ -103,7 +103,11 @@
           "name": "Success — Completed Job",
           "originalRequest": {
             "method": "GET",
-            "url": { "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890", "host": ["{{base_url}}"], "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890"] }
+            "url": {
+              "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890"]
+            }
           },
           "status": "200",
           "code": 200,
@@ -115,7 +119,11 @@
           "name": "Error — Not Found",
           "originalRequest": {
             "method": "GET",
-            "url": { "raw": "{{base_url}}/jobs/99999999-0000-0000-0000-000000000000", "host": ["{{base_url}}"], "path": ["jobs", "99999999-0000-0000-0000-000000000000"] }
+            "url": {
+              "raw": "{{base_url}}/jobs/99999999-0000-0000-0000-000000000000",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "99999999-0000-0000-0000-000000000000"]
+            }
           },
           "status": "404",
           "code": 404,
@@ -141,7 +149,11 @@
           "name": "Success",
           "originalRequest": {
             "method": "GET",
-            "url": { "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/status", "host": ["{{base_url}}"], "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "status"] }
+            "url": {
+              "raw": "{{base_url}}/jobs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/status",
+              "host": ["{{base_url}}"],
+              "path": ["jobs", "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "status"]
+            }
           },
           "status": "200",
           "code": 200,
@@ -161,8 +173,16 @@
           "path": ["jobs"],
           "query": [
             { "key": "page", "value": "1", "description": "Page number (default: 1)" },
-            { "key": "limit", "value": "20", "description": "Items per page (default: 20, max: 100)" },
-            { "key": "status", "value": "done", "description": "Filter by status: queued | processing | done | failed" }
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Items per page (default: 20, max: 100)"
+            },
+            {
+              "key": "status",
+              "value": "done",
+              "description": "Filter by status: queued | processing | done | failed"
+            }
           ]
         },
         "description": "List jobs with pagination and optional status filter. Results are ordered by `createdAt` descending."
@@ -172,7 +192,11 @@
           "name": "Success",
           "originalRequest": {
             "method": "GET",
-            "url": { "raw": "{{base_url}}/jobs?page=1&limit=20&status=done", "host": ["{{base_url}}"], "path": ["jobs"] }
+            "url": {
+              "raw": "{{base_url}}/jobs?page=1&limit=20&status=done",
+              "host": ["{{base_url}}"],
+              "path": ["jobs"]
+            }
           },
           "status": "200",
           "code": 200,

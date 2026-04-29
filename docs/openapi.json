@@ -11,9 +11,7 @@
       "name": "MIT"
     }
   },
-  "servers": [
-    { "url": "http://localhost:3000", "description": "Local development" }
-  ],
+  "servers": [{ "url": "http://localhost:3000", "description": "Local development" }],
   "tags": [
     { "name": "jobs", "description": "Job management" },
     { "name": "health", "description": "Health check" },
@@ -77,9 +75,24 @@
         "summary": "List jobs with pagination and optional status filter",
         "operationId": "listJobs",
         "parameters": [
-          { "name": "page", "in": "query", "required": false, "schema": { "type": "integer", "default": 1, "minimum": 1 } },
-          { "name": "limit", "in": "query", "required": false, "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 } },
-          { "name": "status", "in": "query", "required": false, "schema": { "type": "string", "enum": ["queued", "processing", "done", "failed"] } }
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 100 }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["queued", "processing", "done", "failed"] }
+          }
         ],
         "responses": {
           "200": {
@@ -99,7 +112,12 @@
         "summary": "Get full job details",
         "operationId": "getJob",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
         ],
         "responses": {
           "200": {
@@ -127,7 +145,12 @@
         "summary": "Get lightweight job status (useful for polling)",
         "operationId": "getJobStatus",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
         ],
         "responses": {
           "200": {
@@ -197,10 +220,18 @@
       "JobCreated": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "format": "uuid", "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890" },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+          },
           "status": { "type": "string", "enum": ["queued"], "example": "queued" },
           "mediaType": { "type": "string", "enum": ["image", "video"], "example": "image" },
-          "processingProfile": { "type": "string", "enum": ["thumbnail", "resized-800", "webp"], "example": "thumbnail" }
+          "processingProfile": {
+            "type": "string",
+            "enum": ["thumbnail", "resized-800", "webp"],
+            "example": "thumbnail"
+          }
         },
         "required": ["id", "status", "mediaType", "processingProfile"]
       },
@@ -212,13 +243,18 @@
           "mediaType": { "type": "string", "enum": ["image", "video"] },
           "processingProfile": { "type": "string", "enum": ["thumbnail", "resized-800", "webp"] },
           "processingVersion": { "type": "integer", "example": 1 },
-          "sourceObjectKey": { "type": "string", "example": "originals/a1b2c3d4-e5f6-7890-abcd-ef1234567890/source" },
+          "sourceObjectKey": {
+            "type": "string",
+            "example": "originals/a1b2c3d4-e5f6-7890-abcd-ef1234567890/source"
+          },
           "sourceHash": { "type": "string", "nullable": true, "example": "sha256hash..." },
           "outputManifest": {
             "type": "object",
             "nullable": true,
             "additionalProperties": { "type": "string" },
-            "example": { "thumbnail": "outputs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/thumbnail.webp" }
+            "example": {
+              "thumbnail": "outputs/a1b2c3d4-e5f6-7890-abcd-ef1234567890/thumbnail.webp"
+            }
           },
           "attemptCount": { "type": "integer", "example": 0 },
           "lastError": { "type": "string", "nullable": true },
@@ -227,7 +263,15 @@
           "startedAt": { "type": "string", "format": "date-time", "nullable": true },
           "finishedAt": { "type": "string", "format": "date-time", "nullable": true }
         },
-        "required": ["id", "status", "mediaType", "processingProfile", "sourceObjectKey", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "status",
+          "mediaType",
+          "processingProfile",
+          "sourceObjectKey",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "JobStatus": {
         "type": "object",
@@ -270,16 +314,28 @@
           "info": {
             "type": "object",
             "properties": {
-              "database": { "type": "object", "properties": { "status": { "type": "string", "example": "up" } } },
-              "rabbitmq": { "type": "object", "properties": { "status": { "type": "string", "example": "up" } } }
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              }
             }
           },
           "error": { "type": "object" },
           "details": {
             "type": "object",
             "properties": {
-              "database": { "type": "object", "properties": { "status": { "type": "string", "example": "up" } } },
-              "rabbitmq": { "type": "object", "properties": { "status": { "type": "string", "example": "up" } } }
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              }
             }
           }
         }
@@ -292,14 +348,23 @@
           "error": {
             "type": "object",
             "properties": {
-              "rabbitmq": { "type": "object", "properties": { "status": { "type": "string", "example": "down" } } }
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "down" } }
+              }
             }
           },
           "details": {
             "type": "object",
             "properties": {
-              "database": { "type": "object", "properties": { "status": { "type": "string", "example": "up" } } },
-              "rabbitmq": { "type": "object", "properties": { "status": { "type": "string", "example": "down" } } }
+              "database": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "up" } }
+              },
+              "rabbitmq": {
+                "type": "object",
+                "properties": { "status": { "type": "string", "example": "down" } }
+              }
             }
           }
         }
