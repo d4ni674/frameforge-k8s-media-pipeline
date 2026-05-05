@@ -208,7 +208,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("Worker failed to start:", err);
   logger.fatal(
     { error: err instanceof Error ? err.message : String(err) },
     "Worker failed to start",

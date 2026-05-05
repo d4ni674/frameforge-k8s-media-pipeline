@@ -1,6 +1,6 @@
 import * as amqp from "amqplib";
 
-import { MEDIA_DLQ, MEDIA_QUEUE, MEDIA_RETRY_QUEUE, type JobMessage } from "@frameforge/shared";
+import { MEDIA_DLQ, MEDIA_QUEUE, setupQueues, type JobMessage } from "@frameforge/shared";
 
 export class MqConsumer {
   private connection: amqp.ChannelModel | null = null;
@@ -12,25 +12,7 @@ export class MqConsumer {
     this.connection = await amqp.connect(this.url);
     this.channel = await this.connection.createChannel();
 
-    await this.channel.assertQueue(MEDIA_DLQ, { durable: true });
-
-    await this.channel.assertQueue(MEDIA_RETRY_QUEUE, {
-      durable: true,
-      arguments: {
-        "x-message-ttl": 30000,
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": MEDIA_QUEUE,
-      },
-    });
-
-    await this.channel.assertQueue(MEDIA_QUEUE, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": MEDIA_RETRY_QUEUE,
-      },
-    });
-
+    await setupQueues(this.channel);
     await this.channel.prefetch(1);
   }
 

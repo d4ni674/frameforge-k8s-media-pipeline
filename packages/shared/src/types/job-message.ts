@@ -9,8 +9,6 @@ export interface JobMessage {
   createdAt: string;
 }
 
-export const PROCESSING_EXCHANGE = "media";
-
 export const MEDIA_QUEUE = "media.jobs";
 export const MEDIA_RETRY_QUEUE = "media.jobs.retry";
 export const MEDIA_DLQ = "media.jobs.dlq";

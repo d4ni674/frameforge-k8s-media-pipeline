@@ -2,7 +2,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import * as amqp from "amqplib";
 
 import { ConfigService } from "../config/config.service";
-import { MEDIA_DLQ, MEDIA_QUEUE, MEDIA_RETRY_QUEUE, type JobMessage } from "@frameforge/shared";
+import { MEDIA_QUEUE, setupQueues, type JobMessage } from "@frameforge/shared";
 
 @Injectable()
 export class MqService implements OnModuleInit, OnModuleDestroy {
@@ -15,24 +15,7 @@ export class MqService implements OnModuleInit, OnModuleDestroy {
     this.connection = await amqp.connect(this.config.rabbitmqUrl);
     this.channel = await this.connection.createChannel();
 
-    await this.channel.assertQueue(MEDIA_DLQ, { durable: true });
-
-    await this.channel.assertQueue(MEDIA_RETRY_QUEUE, {
-      durable: true,
-      arguments: {
-        "x-message-ttl": 30000,
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": MEDIA_QUEUE,
-      },
-    });
-
-    await this.channel.assertQueue(MEDIA_QUEUE, {
-      durable: true,
-      arguments: {
-        "x-dead-letter-exchange": "",
-        "x-dead-letter-routing-key": MEDIA_RETRY_QUEUE,
-      },
-    });
+    await setupQueues(this.channel);
   }
 
   isConnected(): boolean {

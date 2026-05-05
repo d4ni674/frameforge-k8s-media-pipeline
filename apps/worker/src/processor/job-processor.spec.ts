@@ -15,11 +15,18 @@ describe("JobProcessor", () => {
     jest.clearAllMocks();
   });
 
-  it("should skip already done jobs", async () => {
-    const job = { status: "done", outputManifest: { thumbnail: "key" } } as unknown as Job;
-    const result = await processor.process(job);
-    expect(result.outputManifest).toEqual({ thumbnail: "key" });
-    expect(mockStorage.download).not.toHaveBeenCalled();
+  it("should throw NonRetryableError for unsupported profile", async () => {
+    const sourceBuffer = Buffer.from("fake");
+    mockStorage.download.mockResolvedValue(sourceBuffer);
+
+    const job = {
+      status: "processing",
+      processingProfile: "unknown",
+      sourceObjectKey: "originals/1/source",
+      id: "1",
+    } as any;
+
+    await expect(processor.process(job)).rejects.toThrow(NonRetryableError);
   });
 
   it("should process thumbnail profile", async () => {

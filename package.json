@@ -20,9 +20,6 @@
     "dev:api": "npm run --workspace @frameforge/api start:dev",
     "dev:worker": "npm run --workspace @frameforge/worker dev"
   },
-  "dependencies": {
-    "uuid": "^14.0.0"
-  },
   "overrides": {
     "uuid": "^14.0.0"
   }

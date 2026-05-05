@@ -20,8 +20,4 @@ export class JobRepository {
       ...updates,
     });
   }
-
-  async save(job: Job): Promise<void> {
-    await this.repo.save(job);
-  }
 }
