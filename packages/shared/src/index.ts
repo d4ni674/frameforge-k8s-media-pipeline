@@ -9,3 +9,5 @@ export {
   MAX_ATTEMPTS,
   RETRY_DELAY_MS,
 } from "./types/job-message";
+
+export { setupQueues } from "./mq/setup-queues";

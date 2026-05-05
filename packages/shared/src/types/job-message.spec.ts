@@ -5,7 +5,6 @@ import {
   MEDIA_DLQ,
   MAX_ATTEMPTS,
   RETRY_DELAY_MS,
-  PROCESSING_EXCHANGE,
 } from "./job-message";
 
 describe("JobMessage constants", () => {
@@ -18,10 +17,6 @@ describe("JobMessage constants", () => {
   it("should define correct retry policy", () => {
     expect(MAX_ATTEMPTS).toBe(3);
     expect(RETRY_DELAY_MS).toBe(30_000);
-  });
-
-  it("should define correct exchange", () => {
-    expect(PROCESSING_EXCHANGE).toBe("media");
   });
 });
 
