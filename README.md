@@ -55,7 +55,7 @@ The API will be available at `http://localhost:3000`.
 
 | Service        | URL                           | Credentials                 |
 | -------------- | ----------------------------- | --------------------------- |
-| API            | http://localhost:3000         | —                           |
+| API            | http://localhost:3000         | `X-API-Key` header (opt-in) |
 | API Metrics    | http://localhost:3000/metrics | —                           |
 | Worker Metrics | http://localhost:9090/metrics | —                           |
 | PostgreSQL     | localhost:5432                | `frameforge` / `frameforge` |
@@ -64,10 +64,24 @@ The API will be available at `http://localhost:3000`.
 
 ## API Endpoints
 
+## Authentication
+
+The API supports optional API key authentication via the `X-API-Key` header.
+
+- Set the `API_KEY` environment variable to enable authentication.
+- When `API_KEY` is empty or unset, all requests pass through (backwards compatible for local dev).
+- Health (`/health`) and metrics (`/metrics`) endpoints are always public.
+- Kubernetes deployments should set `API_KEY` via a Secret.
+
+```bash
+curl -H "X-API-Key: your-secret-key" http://localhost:3000/jobs
+```
+
 ### Upload a Job
 
 ```bash
 curl -X POST http://localhost:3000/jobs \
+  -H "X-API-Key: your-secret-key" \
   -F "file=@photo.png" \
   -F "mediaType=image" \
   -F "processingProfile=thumbnail"
@@ -89,19 +103,19 @@ curl -X POST http://localhost:3000/jobs \
 ### Check Job Status
 
 ```bash
-curl http://localhost:3000/jobs/{id}/status
+curl -H "X-API-Key: your-secret-key" http://localhost:3000/jobs/{id}/status
 ```
 
 ### Get Full Job Details
 
 ```bash
-curl http://localhost:3000/jobs/{id}
+curl -H "X-API-Key: your-secret-key" http://localhost:3000/jobs/{id}
 ```
 
 ### List Jobs
 
 ```bash
-curl "http://localhost:3000/jobs?page=1&limit=20&status=done"
+curl -H "X-API-Key: your-secret-key" "http://localhost:3000/jobs?page=1&limit=20&status=done"
 ```
 
 ### Health Check
@@ -260,6 +274,7 @@ kubectl scale deployment frameforge-api --replicas=2 -n frameforge
 
 ## Security
 
+- Optional API key authentication (`X-API-Key` header). Disabled by default; set `API_KEY` env var to enable. Health and metrics endpoints are always public.
 - `.env` is gitignored; application secrets are injected via environment variables and Kubernetes Secrets at runtime.
 - K8s manifests include default local-dev credentials; Helm values require explicit `--set` overrides (enforced by `required`). Rotate all credentials before production.
 - Docker images run as non-root user (`frameforge`).

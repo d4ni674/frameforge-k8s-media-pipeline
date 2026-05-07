@@ -12,6 +12,7 @@
     }
   },
   "servers": [{ "url": "http://localhost:3000", "description": "Local development" }],
+  "security": [{ "api-key": [] }],
   "tags": [
     { "name": "jobs", "description": "Job management" },
     { "name": "health", "description": "Health check" },
@@ -177,6 +178,7 @@
         "tags": ["health"],
         "summary": "Health check — returns status of API, database, and RabbitMQ",
         "operationId": "healthCheck",
+        "security": [],
         "responses": {
           "200": {
             "description": "All services healthy",
@@ -202,6 +204,7 @@
         "tags": ["metrics"],
         "summary": "Prometheus-format metrics",
         "operationId": "getMetrics",
+        "security": [],
         "responses": {
           "200": {
             "description": "Prometheus text format metrics",
@@ -216,6 +219,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API key for authentication. Omitted or empty API_KEY env var disables auth."
+      }
+    },
     "schemas": {
       "JobCreated": {
         "type": "object",

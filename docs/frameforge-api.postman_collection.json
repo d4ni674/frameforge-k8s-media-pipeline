@@ -9,7 +9,13 @@
       "name": "Create Job",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "description": "API key (required when API_KEY env var is set)"
+          }
+        ],
         "body": {
           "mode": "formdata",
           "formdata": [
@@ -90,7 +96,13 @@
       "name": "Get Job",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "description": "API key (required when API_KEY env var is set)"
+          }
+        ],
         "url": {
           "raw": "{{base_url}}/jobs/:id",
           "host": ["{{base_url}}"],
@@ -136,7 +148,13 @@
       "name": "Get Job Status",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "description": "API key (required when API_KEY env var is set)"
+          }
+        ],
         "url": {
           "raw": "{{base_url}}/jobs/:id/status",
           "host": ["{{base_url}}"],
@@ -166,7 +184,13 @@
       "name": "List Jobs",
       "request": {
         "method": "GET",
-        "header": [],
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}",
+            "description": "API key (required when API_KEY env var is set)"
+          }
+        ],
         "url": {
           "raw": "{{base_url}}/jobs?page=1&limit=20&status=done",
           "host": ["{{base_url}}"],
@@ -262,6 +286,10 @@
     {
       "key": "base_url",
       "value": "http://localhost:3000"
+    },
+    {
+      "key": "api_key",
+      "value": ""
     }
   ]
 }
