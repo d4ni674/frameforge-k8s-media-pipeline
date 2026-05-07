@@ -65,4 +65,8 @@ export class ConfigService {
   get port(): number {
     return Number(this.get("PORT") ?? "3000");
   }
+
+  get apiKey(): string {
+    return this.get("API_KEY") ?? "";
+  }
 }
