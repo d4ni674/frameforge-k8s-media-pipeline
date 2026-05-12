@@ -5,11 +5,12 @@ import { Job } from "@frameforge/shared";
 
 import { JobsController } from "./jobs.controller";
 import { JobsService } from "./jobs.service";
+import { JobSweeperService } from "./job-sweeper.service";
 import { MetricsService } from "../metrics";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Job])],
   controllers: [JobsController],
-  providers: [JobsService, MetricsService],
+  providers: [JobsService, JobSweeperService, MetricsService],
 })
 export class JobsModule {}

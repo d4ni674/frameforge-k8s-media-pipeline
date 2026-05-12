@@ -279,6 +279,10 @@ kubectl scale deployment frameforge-api --replicas=2 -n frameforge
 - Security headers via `helmet` middleware.
 - CORS configured via `CORS_ORIGINS` env var (defaults to `*`). Set to a comma-separated list of origins for production.
 - File upload validation checks magic bytes (not just MIME type) to prevent content-type spoofing.
+- RabbitMQ reconnection with exponential backoff (max 10 attempts, up to 30s delay).
+- Background job sweeper re-publishes jobs stuck in "queued" state (>5 min, never started) to RabbitMQ.
+- API graceful shutdown ensures MQ connections are closed cleanly on SIGTERM.
+- Worker concurrency: configurable prefetch via `WORKER_PREFETCH` env var, graceful shutdown waits for all in-flight jobs.
 - `.env` is gitignored; application secrets are injected via environment variables and Kubernetes Secrets at runtime.
 - K8s manifests include default local-dev credentials; Helm values require explicit `--set` overrides (enforced by `required`). Rotate all credentials before production.
 - Docker images run as non-root user (`frameforge`).

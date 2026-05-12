@@ -12,6 +12,7 @@ import { ConfigService } from "./config/config.service";
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
+  app.enableShutdownHooks();
   app.use(helmet());
 
   const config = app.get(ConfigService);

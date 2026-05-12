@@ -26,6 +26,13 @@ export class StorageService implements OnModuleInit {
     }
   }
 
+  async checkBucket(): Promise<void> {
+    const exists = await this.client.bucketExists(this.config.minioBucket);
+    if (!exists) {
+      throw new Error(`Bucket ${this.config.minioBucket} does not exist`);
+    }
+  }
+
   async upload(
     objectKey: string,
     data: Buffer | Readable,

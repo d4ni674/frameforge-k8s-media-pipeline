@@ -4,6 +4,7 @@ import { SkipThrottle } from "@nestjs/throttler";
 import { Public } from "../auth";
 
 import { RabbitMQHealthIndicator } from "./rabbitmq.health.indicator";
+import { MinioHealthIndicator } from "./minio.health.indicator";
 
 @Controller("health")
 export class HealthController {
@@ -11,6 +12,7 @@ export class HealthController {
     private health: HealthCheckService,
     private db: TypeOrmHealthIndicator,
     private rabbitmq: RabbitMQHealthIndicator,
+    private minio: MinioHealthIndicator,
   ) {}
 
   @Get()
@@ -21,6 +23,7 @@ export class HealthController {
     return this.health.check([
       () => this.db.pingCheck("database"),
       () => this.rabbitmq.isHealthy("rabbitmq"),
+      () => this.minio.isHealthy("minio"),
     ]);
   }
 }

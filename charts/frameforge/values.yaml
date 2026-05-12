@@ -27,6 +27,7 @@ env:
   corsOrigins: "*"
   throttleTtl: "60000"
   throttleLimit: "100"
+  workerPrefetch: "1"
 
 resources:
   api:
