@@ -24,6 +24,9 @@ env:
   rabbitmqHost: rabbitmq.frameforge.svc.cluster.local
   rabbitmqPort: "5672"
   rabbitmqUser: frameforge
+  corsOrigins: "*"
+  throttleTtl: "60000"
+  throttleLimit: "100"
 
 resources:
   api:
@@ -73,3 +76,6 @@ secrets:
   minioAccessKey: ""
   minioSecretKey: ""
   rabbitmqPassword: ""
+  # Set apiKey to enable API key authentication (X-API-Key header).
+  # Leave empty to disable auth (local dev only).
+  apiKey: ""

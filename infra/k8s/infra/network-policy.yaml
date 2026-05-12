@@ -30,13 +30,13 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: frameforge-worker-egress
+  name: frameforge-api-egress
   namespace: frameforge
 spec:
   podSelector:
     matchLabels:
       app.kubernetes.io/name: frameforge
-      app.kubernetes.io/component: worker
+      app.kubernetes.io/component: api
   policyTypes:
     - Egress
   egress:
@@ -61,3 +61,59 @@ spec:
       ports:
         - protocol: TCP
           port: 5672
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frameforge-worker-egress
+  namespace: frameforge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frameforge
+      app.kubernetes.io/component: worker
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app: minio
+      ports:
+        - protocol: TCP
+          port: 9000
+    - to:
+        - podSelector:
+            matchLabels:
+              app: rabbitmq
+      ports:
+        - protocol: TCP
+          port: 5672
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53

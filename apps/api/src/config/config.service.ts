@@ -69,4 +69,18 @@ export class ConfigService {
   get apiKey(): string {
     return this.get("API_KEY") ?? "";
   }
+
+  get corsOrigins(): string[] {
+    const raw = this.get("CORS_ORIGINS") ?? "*";
+    if (raw === "*") return ["*"];
+    return raw.split(",").map((s) => s.trim());
+  }
+
+  get throttlerTtl(): number {
+    return Number(this.get("THROTTLE_TTL") ?? "60000");
+  }
+
+  get throttlerLimit(): number {
+    return Number(this.get("THROTTLE_LIMIT") ?? "100");
+  }
 }

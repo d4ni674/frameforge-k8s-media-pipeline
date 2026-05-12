@@ -275,6 +275,10 @@ kubectl scale deployment frameforge-api --replicas=2 -n frameforge
 ## Security
 
 - Optional API key authentication (`X-API-Key` header). Disabled by default; set `API_KEY` env var to enable. Health and metrics endpoints are always public.
+- Rate limiting via `@nestjs/throttler` — configurable via `THROTTLE_TTL` and `THROTTLE_LIMIT` (defaults: 60s / 100 requests). `POST /jobs` is stricter at 5 requests/60s.
+- Security headers via `helmet` middleware.
+- CORS configured via `CORS_ORIGINS` env var (defaults to `*`). Set to a comma-separated list of origins for production.
+- File upload validation checks magic bytes (not just MIME type) to prevent content-type spoofing.
 - `.env` is gitignored; application secrets are injected via environment variables and Kubernetes Secrets at runtime.
 - K8s manifests include default local-dev credentials; Helm values require explicit `--set` overrides (enforced by `required`). Rotate all credentials before production.
 - Docker images run as non-root user (`frameforge`).

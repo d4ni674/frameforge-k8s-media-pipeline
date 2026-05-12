@@ -33,6 +33,24 @@ describe("ConfigService", () => {
     expect(service.minioBucket).toBe("frameforge");
     expect(service.port).toBe(3000);
     expect(service.minioUseSsl).toBe(false);
+    expect(service.apiKey).toBe("");
+    expect(service.corsOrigins).toEqual(["*"]);
+    expect(service.throttlerTtl).toBe(60000);
+    expect(service.throttlerLimit).toBe(100);
+  });
+
+  it("should return configured CORS origins", () => {
+    process.env.CORS_ORIGINS = "http://localhost:3000,https://example.com";
+    const svc = new ConfigService();
+    expect(svc.corsOrigins).toEqual(["http://localhost:3000", "https://example.com"]);
+    delete process.env.CORS_ORIGINS;
+  });
+
+  it("should return configured API key", () => {
+    process.env.API_KEY = "secret-key";
+    const svc = new ConfigService();
+    expect(svc.apiKey).toBe("secret-key");
+    delete process.env.API_KEY;
   });
 
   it("should throw on missing required variable", () => {
