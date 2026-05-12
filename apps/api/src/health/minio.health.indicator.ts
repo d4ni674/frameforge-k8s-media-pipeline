@@ -1,20 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { HealthIndicator, HealthIndicatorResult, HealthCheckError } from "@nestjs/terminus";
-import { MqService } from "../mq/mq.service";
+import { StorageService } from "../storage/storage.service";
 
 @Injectable()
-export class RabbitMQHealthIndicator extends HealthIndicator {
-  constructor(private readonly mq: MqService) {
+export class MinioHealthIndicator extends HealthIndicator {
+  constructor(private readonly storage: StorageService) {
     super();
   }
 
   async isHealthy(key: string): Promise<HealthIndicatorResult> {
     try {
-      await this.mq.checkQueue();
+      await this.storage.checkBucket();
       return this.getStatus(key, true);
     } catch (error) {
       throw new HealthCheckError(
-        "RabbitMQ health check failed",
+        "MinIO health check failed",
         this.getStatus(key, false, { message: (error as Error).message }),
       );
     }

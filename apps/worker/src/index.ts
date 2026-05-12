@@ -30,6 +30,12 @@ async function main(): Promise<void> {
   const metricsPort = Number(process.env.METRICS_PORT ?? "9090");
   startMetricsServer(metricsPort, (msg) => logger.info(msg));
 
+  const prefetch = Number(process.env.WORKER_PREFETCH ?? "1");
+  if (prefetch < 1) {
+    throw new Error("WORKER_PREFETCH must be >= 1");
+  }
+  logger.info({ prefetch }, "Worker prefetch configured");
+
   const storage = new StorageService({
     endpoint: requireEnv("MINIO_ENDPOINT"),
     port: Number(process.env.MINIO_PORT ?? "9000"),
@@ -57,11 +63,14 @@ async function main(): Promise<void> {
   const processor = new JobProcessor(storage);
 
   const consumer = new MqConsumer(requireEnv("RABBITMQ_URL"));
-  await consumer.connect();
-  logger.info({ queue: MEDIA_QUEUE }, "Connected to RabbitMQ");
+  await consumer.connect(prefetch);
+  logger.info({ queue: MEDIA_QUEUE, prefetch }, "Connected to RabbitMQ");
+
+  let shuttingDown = false;
+  const inFlightPromises = new Set<Promise<unknown>>();
 
   await consumer.consume(
-    async (message: JobMessage): Promise<boolean> => {
+    async (message: JobMessage, _originalMsg: unknown): Promise<boolean> => {
       if (shuttingDown) {
         return false; // nack without requeue so another worker can pick it up
       }
@@ -160,8 +169,9 @@ async function main(): Promise<void> {
       };
 
       const jobPromise = processJob();
-      inFlightPromise = jobPromise.finally(() => {
-        inFlightPromise = null;
+      inFlightPromises.add(jobPromise);
+      jobPromise.finally(() => {
+        inFlightPromises.delete(jobPromise);
       });
 
       return jobPromise;
@@ -170,9 +180,6 @@ async function main(): Promise<void> {
   );
 
   logger.info("Worker is ready and waiting for jobs");
-
-  let shuttingDown = false;
-  let inFlightPromise: Promise<unknown> | null = null;
 
   const shutdown = async (signal: string): Promise<void> => {
     if (shuttingDown) return;
@@ -184,15 +191,15 @@ async function main(): Promise<void> {
     await consumer.close();
     logger.info("Stopped consuming new messages");
 
-    // Wait for in-flight job to complete (with timeout)
-    if (inFlightPromise) {
-      logger.info("Waiting for in-flight job to complete...");
+    // Wait for all in-flight jobs to complete (with timeout)
+    if (inFlightPromises.size > 0) {
+      logger.info(`Waiting for ${inFlightPromises.size} in-flight job(s) to complete...`);
       const timeout = new Promise<void>((_, reject) =>
         setTimeout(() => reject(new Error("Shutdown timeout")), 30_000),
       );
       try {
-        await Promise.race([inFlightPromise, timeout]);
-        logger.info("In-flight job completed gracefully");
+        await Promise.race([Promise.allSettled(inFlightPromises), timeout]);
+        logger.info("All in-flight jobs completed gracefully");
       } catch {
         logger.warn("Shutdown timeout reached, forcing exit");
       }

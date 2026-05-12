@@ -8,12 +8,12 @@ export class MqConsumer {
 
   constructor(private url: string) {}
 
-  async connect(): Promise<void> {
+  async connect(prefetch = 1): Promise<void> {
     this.connection = await amqp.connect(this.url);
     this.channel = await this.connection.createChannel();
 
     await setupQueues(this.channel);
-    await this.channel.prefetch(1);
+    await this.channel.prefetch(prefetch);
   }
 
   async consume(

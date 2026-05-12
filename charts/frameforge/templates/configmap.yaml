@@ -19,3 +19,4 @@ data:
   CORS_ORIGINS: {{ .Values.env.corsOrigins | quote }}
   THROTTLE_TTL: {{ .Values.env.throttleTtl | quote }}
   THROTTLE_LIMIT: {{ .Values.env.throttleLimit | quote }}
+  WORKER_PREFETCH: {{ .Values.env.workerPrefetch | quote }}

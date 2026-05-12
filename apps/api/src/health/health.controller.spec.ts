@@ -2,6 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { HealthCheckService, TypeOrmHealthIndicator } from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { RabbitMQHealthIndicator } from "./rabbitmq.health.indicator";
+import { MinioHealthIndicator } from "./minio.health.indicator";
 
 describe("HealthController", () => {
   let controller: HealthController;
@@ -18,6 +19,10 @@ describe("HealthController", () => {
     isHealthy: jest.fn().mockResolvedValue({ rabbitmq: { status: "up" } }),
   };
 
+  const mockMinio = {
+    isHealthy: jest.fn().mockResolvedValue({ minio: { status: "up" } }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
@@ -25,6 +30,7 @@ describe("HealthController", () => {
         { provide: HealthCheckService, useValue: mockHealthCheckService },
         { provide: TypeOrmHealthIndicator, useValue: mockTypeOrm },
         { provide: RabbitMQHealthIndicator, useValue: mockRabbitMQ },
+        { provide: MinioHealthIndicator, useValue: mockMinio },
       ],
     }).compile();
 
