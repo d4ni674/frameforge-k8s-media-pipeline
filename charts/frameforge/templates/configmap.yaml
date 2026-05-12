@@ -16,3 +16,6 @@ data:
   RABBITMQ_HOST: {{ .Values.env.rabbitmqHost | quote }}
   RABBITMQ_PORT: {{ .Values.env.rabbitmqPort | quote }}
   RABBITMQ_USER: {{ .Values.env.rabbitmqUser | quote }}
+  CORS_ORIGINS: {{ .Values.env.corsOrigins | quote }}
+  THROTTLE_TTL: {{ .Values.env.throttleTtl | quote }}
+  THROTTLE_LIMIT: {{ .Values.env.throttleLimit | quote }}

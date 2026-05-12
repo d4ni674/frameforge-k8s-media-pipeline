@@ -1,5 +1,6 @@
 import { Controller, Get } from "@nestjs/common";
 import { HealthCheck, HealthCheckService, TypeOrmHealthIndicator } from "@nestjs/terminus";
+import { SkipThrottle } from "@nestjs/throttler";
 import { Public } from "../auth";
 
 import { RabbitMQHealthIndicator } from "./rabbitmq.health.indicator";
@@ -15,6 +16,7 @@ export class HealthController {
   @Get()
   @HealthCheck()
   @Public()
+  @SkipThrottle()
   check() {
     return this.health.check([
       () => this.db.pingCheck("database"),

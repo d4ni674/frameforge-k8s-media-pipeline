@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 import { Job } from "@frameforge/shared";
 
@@ -13,6 +14,16 @@ import { MetricsController, MetricsService } from "./metrics";
 
 @Module({
   imports: [
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.throttlerTtl,
+          limit: config.throttlerLimit,
+        },
+      ],
+    }),
     ConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

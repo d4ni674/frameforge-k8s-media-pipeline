@@ -12,9 +12,11 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiTags, ApiOperation, ApiConsumes, ApiQuery } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 
 import { CreateJobDto } from "./dto/create-job.dto";
 import { JobsService } from "./jobs.service";
+import { validateFileMagic } from "./file-magic";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
@@ -26,6 +28,7 @@ export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
 
   @Post()
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @ApiOperation({ summary: "Upload a media file and create a processing job" })
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
@@ -43,6 +46,10 @@ export class JobsController {
 
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
       throw new BadRequestException(`Unsupported file type: ${file.mimetype}`);
+    }
+
+    if (!validateFileMagic(file.buffer, file.mimetype)) {
+      throw new BadRequestException("File content does not match declared type");
     }
 
     if (body.mediaType !== "image") {

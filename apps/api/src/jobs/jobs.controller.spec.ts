@@ -27,11 +27,12 @@ describe("JobsController", () => {
 
   describe("createJob", () => {
     it("should create a job with valid file and body", async () => {
+      const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
       const file = {
-        buffer: Buffer.from("test"),
+        buffer: pngMagic,
         mimetype: "image/png",
         originalname: "test.png",
-        size: 100,
+        size: pngMagic.length,
       } as Express.Multer.File;
 
       const body = { mediaType: "image" as const, processingProfile: "thumbnail" as const };
@@ -68,14 +69,27 @@ describe("JobsController", () => {
     });
 
     it("should throw BadRequestException for non-image media type", async () => {
+      const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
       const file = {
-        buffer: Buffer.from("test"),
+        buffer: pngMagic,
+        mimetype: "image/png",
+        originalname: "test.png",
+        size: pngMagic.length,
+      } as Express.Multer.File;
+      await expect(
+        controller.createJob(file, { mediaType: "video", processingProfile: "thumbnail" }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("should throw BadRequestException for file content not matching declared type", async () => {
+      const file = {
+        buffer: Buffer.from("not an image"),
         mimetype: "image/png",
         originalname: "test.png",
         size: 100,
       } as Express.Multer.File;
       await expect(
-        controller.createJob(file, { mediaType: "video", processingProfile: "thumbnail" }),
+        controller.createJob(file, { mediaType: "image", processingProfile: "thumbnail" }),
       ).rejects.toThrow(BadRequestException);
     });
   });
