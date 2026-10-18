@@ -21,7 +21,7 @@ High-signal guidance for OpenCode sessions working in this repo.
 
 Dev servers:
 
-- API (`apps/api`): `ts-node-dev --respawn --transpile-only src/main.ts` → port 3000.
+- API (`apps/api`): `tsx watch --clear-screen=false src/main.ts` → port 3000.
 - Worker (`apps/worker`): `tsx src/index.ts` → metrics on port 9090.
 
 ## Build & TypeScript
