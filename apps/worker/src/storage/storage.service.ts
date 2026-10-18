@@ -1,4 +1,10 @@
-import * as Minio from "minio";
+import {
+  CreateBucketCommand,
+  GetObjectCommand,
+  HeadBucketCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 export interface StorageConfig {
   endpoint: string;
@@ -10,39 +16,57 @@ export interface StorageConfig {
 }
 
 export class StorageService {
-  private client: Minio.Client;
+  private client: S3Client;
   private bucket: string;
 
   constructor(config: StorageConfig) {
-    this.client = new Minio.Client({
-      endPoint: config.endpoint,
-      port: config.port,
-      accessKey: config.accessKey,
-      secretKey: config.secretKey,
-      useSSL: config.useSsl,
+    this.client = new S3Client({
+      endpoint: `${config.useSsl ? "https" : "http"}://${config.endpoint}:${config.port}`,
+      region: "us-east-1",
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: config.accessKey,
+        secretAccessKey: config.secretKey,
+      },
     });
     this.bucket = config.bucket;
   }
 
   async ensureBucket(): Promise<void> {
-    const exists = await this.client.bucketExists(this.bucket);
-    if (!exists) {
-      await this.client.makeBucket(this.bucket);
+    try {
+      await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+    } catch (error) {
+      const s3Error = error as { name?: string; $metadata?: { httpStatusCode?: number } };
+      if (
+        s3Error.name !== "NotFound" &&
+        s3Error.name !== "NoSuchBucket" &&
+        s3Error.$metadata?.httpStatusCode !== 404
+      ) {
+        throw error;
+      }
+      await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
     }
   }
 
   async upload(objectKey: string, data: Buffer, size: number, contentType: string): Promise<void> {
-    await this.client.putObject(this.bucket, objectKey, data, size, {
-      "Content-Type": contentType,
-    });
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: objectKey,
+        Body: data,
+        ContentLength: size,
+        ContentType: contentType,
+      }),
+    );
   }
 
   async download(objectKey: string): Promise<Buffer> {
-    const stream = await this.client.getObject(this.bucket, objectKey);
-    const chunks: Buffer[] = [];
-    for await (const chunk of stream) {
-      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    const result = await this.client.send(
+      new GetObjectCommand({ Bucket: this.bucket, Key: objectKey }),
+    );
+    if (!result.Body) {
+      throw new Error(`Object ${objectKey} returned no body`);
     }
-    return Buffer.concat(chunks);
+    return Buffer.from(await result.Body.transformToByteArray());
   }
 }

@@ -10,7 +10,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run -ws build",
+    "build": "npm run --workspace @frameforge/shared build && npm run --workspace @frameforge/api build && npm run --workspace @frameforge/worker build",
     "test": "npm run -ws test",
     "test:e2e": "cd e2e && npm test",
     "lint": "eslint .",
@@ -21,6 +21,8 @@
     "dev:worker": "npm run --workspace @frameforge/worker dev"
   },
   "overrides": {
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "js-yaml": "5.5.0",
+    "sprintf-js": "1.1.3"
   }
 }
